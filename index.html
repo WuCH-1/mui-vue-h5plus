@@ -107,7 +107,7 @@
 						url:'sub.html',
 						id:'sub',
 						styles:{
-							top:'108px',
+							top:'107px',
 							bottom:'44px'						
 						}
 					}
@@ -120,7 +120,7 @@
 					var header = document.getElementById('header');
 					header.style.paddingTop = StatusbarHeigth + 'px';
 				}
-			})
+			});
 			var indexCateObj = new Vue({
 				el:'#indexCate',
 				data:{
@@ -138,8 +138,9 @@
 			
 			mui('.mui-scroll').on('tap','.mui-control-item',function(){
 				var index = this.getAttribute('id');
-
-			})
+				var subpage = plus.webview.getWebviewById('sub');//获取子页面
+				subpage.evalJS('cate = '+index+'; getNews();');//子页面参数传递
+			});
 		</script>
 	</body>
 

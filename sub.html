@@ -6,19 +6,134 @@
 		<title></title>
 		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
 		<link href="css/mui.min.css" rel="stylesheet" />
+		<style type="text/css">
+			.news-list {
+				padding: 0;
+				margin: 0;
+			}
+			
+			.news-list li {
+				display: flex;
+				width: 100%;
+				padding: 10px;
+				background: #FFFFFF;
+				margin-bottom: 1px;
+			}
+			
+			.news-list-img {
+				width: 88px;
+				flex-shrink: 0;
+			}
+			
+			.news-list-img img {
+				width: 100%;
+			}
+			
+			.news-list-title {
+				width: 100%;
+				margin: 0px 10px;
+				line-height: 1.6em;
+				font-size: 15px;
+			}
+		</style>
 	</head>
 
 	<body>
 		<div id="refreshContainer">
 			<ul class="news-list">
-				
+				<li v-for="item in newsList" @click="showArticleinfo(item.article_id)">
+					<div class="news-list-img">
+						<img src="mui-media-object mui-pull-left" v-bind:src="'http://static.hcoder.net/'+item.article_img_url" />
+					</div>
+					<div class="news-list-title">
+						{{item.article_title}}
+					</div>
+				</li>
 			</ul>
 		</div>
-		
+
 		<script src="js/mui.min.js"></script>
 		<script src="js/vue.min.js"></script>
 		<script type="text/javascript">
-			mui.init()
+			mui.init({
+				pullRefresh: {
+					container: "#refreshContainer", //下拉刷新容器标识，querySelector能定位的css选择器均可
+					down: {
+						style: 'circle', //必选，下拉刷新样式，目前支持原生5+'circle'样式
+						color: '#2BD009',
+						hieght: '50px',
+						range: '100px',
+						offset: '50px',
+						auto: 'true',
+						callback: getNews //必选，刷新函数
+					},
+					up: {
+						height: 50,
+						auto: true,
+						contentrefresh: "正在加载...",
+						contentnomore: '没有更多数据了',
+						callback: getMoreNews
+					}
+				}
+			});
+			mui.plusReady(function() {
+				//				getNews();
+			});
+
+			var newsObj = new Vue({
+				el: "#refreshContainer",
+				data: {
+					newsList: []
+				},
+				methods: {
+					showArticleinfo: function(articlId) {
+						mui.openWindow({
+							url: "info.html",
+							id: 'info',
+							extras: {
+								articlId: articlId
+							}
+						})
+					}
+				}
+			});
+
+			var cate = 0,
+				page = 1;
+
+			function getNews() {
+				page = 1;
+				//plus.nativeUI.showWaiting();循环动画
+				mui.getJSON(
+					apiUrl + 'article&m=articleList&page=' + page + '&cate=' + cate,
+					function(res) {
+						newsObj.newsList = res.data;
+						//plus.nativeUI.closeWaiting();关闭循环动画
+						mui('#refreshContainer').pullRefresh().endPulldown();
+						mui('#refreshContainer').pullRefresh().refresh(true);
+						page++;
+					}
+				);
+			}
+
+			function getMoreNews() {
+				var _self = this;
+				//plus.nativeUI.showWaiting();循环动画
+				mui.getJSON(
+					apiUrl + 'article&m=articleList&page=' + page + '&cate=' + cate,
+					function(res) {
+						console.log(JSON.stringify(res));
+						//判斷加載完畢
+						if(res.status == "empty") {
+							_self.endPullupToRefresh(true);
+							return false;
+						}
+						newsObj.newsList = newsObj.newsList.concat(res.data);
+						page++;
+						_self.endPullupToRefresh(false);
+					}
+				);
+			}
 		</script>
 	</body>
 
