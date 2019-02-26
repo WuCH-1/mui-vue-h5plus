@@ -70,9 +70,9 @@
 			<div style="display:flex;">
 				<div id="logo">
 					<img src="imgs/logo.png" />
-				</div>	
+				</div>
 				<div id="indexSearch">
-					<input type="search" value=""/>
+					<input type="search" id="indexSearchPut" value="" />
 				</div>
 			</div>
 			<div id="indexCate" class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
@@ -82,36 +82,34 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<nav class="mui-bar mui-bar-tab">
-		    <a class="mui-tab-item mui-active">
-		        <span class="mui-icon mui-icon-home"></span>
-		        <span class="mui-tab-label">主页</span>
-		    </a>
-		    <a class="mui-tab-item">
-		        <span class="mui-icon mui-icon-videocam"></span>
-		        <span class="mui-tab-label">视频</span>
-		    </a>
-		    <a class="mui-tab-item" id="page_login">
-		        <span class="mui-icon mui-icon-gear"></span>
-		        <span class="mui-tab-label">我的</span>
-		    </a>
+			<a class="mui-tab-item mui-active">
+				<span class="mui-icon mui-icon-home"></span>
+				<span class="mui-tab-label">主页</span>
+			</a>
+			<a class="mui-tab-item">
+				<span class="mui-icon mui-icon-videocam"></span>
+				<span class="mui-tab-label">视频</span>
+			</a>
+			<a class="mui-tab-item" id="page_login">
+				<span class="mui-icon mui-icon-gear"></span>
+				<span class="mui-tab-label">我的</span>
+			</a>
 		</nav>
-		
+
 		<script src="js/mui.min.js"></script>
 		<script src="js/vue.min.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			mui.init({
-				subpages:[
-					{
-						url:'sub.html',
-						id:'sub',
-						styles:{
-							top:'107px',
-							bottom:'44px'						
-						}
+				subpages: [{
+					url: 'sub.html',
+					id: 'sub',
+					styles: {
+						top: '107px',
+						bottom: '44px'
 					}
-				]
+				}]
 			});
 			mui.plusReady(function() {
 				var isImmersedStatusbar = plus.navigator.isImmersedStatusbar();
@@ -122,25 +120,46 @@
 				}
 			});
 			var indexCateObj = new Vue({
-				el:'#indexCate',
-				data:{
-					cate:[]
+				el: '#indexCate',
+				data: {
+					cate: []
 				}
 			});
-			
+
 			mui.getJSON(
-				apiUrl+'cate',
-				{},
-				function(res){
-					indexCateObj.cate=res.data;
+				apiUrl + 'cate', {},
+				function(res) {
+					indexCateObj.cate = res.data;
 				}
 			);
-			
-			mui('.mui-scroll').on('tap','.mui-control-item',function(){
+
+			mui('.mui-scroll').on('tap', '.mui-control-item', function() {
 				var index = this.getAttribute('id');
-				var subpage = plus.webview.getWebviewById('sub');//获取子页面
-				subpage.evalJS('cate = '+index+'; getNews();');//子页面参数传递
+				var subpage = plus.webview.getWebviewById('sub'); //获取子页面
+				subpage.evalJS('cate = ' + index + '; getNews();'); //子页面参数传递
 			});
+
+			var indexSearchPut = document.getElementById('indexSearchPut');
+			indexSearchPut.addEventListener('keyup', function(e) {
+				if(e.keyCode == 13) {
+					document.activeElement.blur();
+					var kwd = indexSearchPut.value;
+					var subpage = plus.webview.getWebviewById('sub');
+					subpage.evalJS('kwd="' + kwd + '";getNews();');
+				}
+			})
+			
+			//我的
+			document.getElementById('page_login').addEventListener('tap',function(){
+				var LoginRes = checkLogin();
+				if(!LoginRes){
+					return false;
+				};
+				mui.openWindow({
+					url:"my.html",
+					id:'my'
+				})
+			})
 		</script>
 	</body>
 

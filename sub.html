@@ -89,6 +89,7 @@
 					showArticleinfo: function(articlId) {
 						mui.openWindow({
 							url: "info.html",
+//							url:"./speech/login.html",
 							id: 'info',
 							extras: {
 								articlId: articlId
@@ -99,28 +100,31 @@
 			});
 
 			var cate = 0,
-				page = 1;
+				page = 1,
+				kwd = '';
 
 			function getNews() {
 				page = 1;
 				//plus.nativeUI.showWaiting();循环动画
-				mui.getJSON(
+				mui.post(
 					apiUrl + 'article&m=articleList&page=' + page + '&cate=' + cate,
+					{kwd:kwd},
 					function(res) {
 						newsObj.newsList = res.data;
 						//plus.nativeUI.closeWaiting();关闭循环动画
 						mui('#refreshContainer').pullRefresh().endPulldown();
 						mui('#refreshContainer').pullRefresh().refresh(true);
 						page++;
-					}
+					},'json'
 				);
 			}
 
 			function getMoreNews() {
 				var _self = this;
 				//plus.nativeUI.showWaiting();循环动画
-				mui.getJSON(
+				mui.post(
 					apiUrl + 'article&m=articleList&page=' + page + '&cate=' + cate,
+					{kwd:kwd},
 					function(res) {
 						console.log(JSON.stringify(res));
 						//判斷加載完畢
@@ -131,7 +135,7 @@
 						newsObj.newsList = newsObj.newsList.concat(res.data);
 						page++;
 						_self.endPullupToRefresh(false);
-					}
+					},'json'
 				);
 			}
 		</script>
